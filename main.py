@@ -29,6 +29,6 @@ async def open_server(interaction: discord.Interaction):
     embed = discord.Embed(
         color=0x2b2d31,
     )
-    embed.set_author(name="حالة السيرفر APP", icon_url="https://i.imgur.com/6VBx3io.png")
+        embed.add_field(name="🔓 السيرفر مفتوح", value="السيرفر مفتوح ✅")
     
     embed.add_field(name="🔓 السيرفر مفتوح", value="\
