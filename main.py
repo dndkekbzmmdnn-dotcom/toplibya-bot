@@ -1,34 +1,35 @@
-import discord
-from discord.ext import commands
-import os
-import datetime
+import discord, os
+from flask import Flask
+from threading import Thread
 
-TOKEN = os.getenv("DISCORD_TOKEN")
+# ما نحطوش التوكن هنا - ناخذوه من Render
+TOKEN = os.environ.get("TOKEN")
+SERVER_NAME = "TOP LIBYA"
+
+app = Flask('')
+@app.route('/')
+def home(): return "TOP LIBYA Bot Online!"
+def run(): app.run(host='0.0.0.0', port=8080)
+Thread(target=run).start()
+
 intents = discord.Intents.default()
-bot = commands.Bot(command_prefix="!", intents=intents)
+intents.message_content = True
+intents.members = True
+client = discord.Client(intents=intents)
 
-start_time = datetime.datetime.now()
-
-@bot.event
+@client.event
 async def on_ready():
-    print(f"{bot.user} جاهز")
-    await bot.tree.sync()
-    print("تمت المزامنة")
+    print(f"✅ {SERVER_NAME} شغال!")
 
-def get_uptime():
-    delta = datetime.datetime.now() - start_time
-    days = delta.days
-    hours = delta.seconds // 3600
-    minutes = (delta.seconds // 60) % 60
-    return f"{days} يوم {hours} ساعة {minutes} دقيقة"
+@client.event
+async def on_message(message):
+    if message.author.bot: return
+    if "تفعيل" in message.content and message.mentions:
+        u = message.mentions[0]
+        g = message.content.replace("تفعيل","")
+        for m in message.mentions: g = g.replace(f"<@{m.id}>","").replace(f"<@!{m.id}>","")
+        g = g.replace("@","").strip().split()[0] if g.strip() else "غير معروف"
+        embed = discord.Embed(title=SERVER_NAME, description=f"[✓] تم ربط الحساب بنجاح\nالحساب في اللعبة : {g}\nالحساب في الديسكورد : {u.mention}", color=0x2b2d31)
+        await message.channel.send(embed=embed)
 
-@bot.tree.command(name="open", description="فتح السيرفر")
-async def open_server(interaction: discord.Interaction):
-    embed = discord.Embed(
-        color=0x2b2d31
-    )
-    embed.add_field(name="🔓 السيرفر مفتوح", value="السيرفر مفتوح 🟢", inline=False)
-    embed.add_field(name="⏰ المدة", value=get_uptime(), inline=False)
-    await interaction.response.send_message(embed=embed)
-
-bot.run(TOKEN)
+client.run(TOKEN)
